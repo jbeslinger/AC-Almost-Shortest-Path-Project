@@ -55,14 +55,47 @@ namespace Almost_Shortest_Path.Tools
             Delete(FindMin());
         }
 
-        public void Delete(T item)
+        public bool Delete(T item)
         {
-            Delete(_positions[item]);
+            int pos = GetPosition(item);
+            if (pos > 0)
+            {
+                Delete(pos);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public void ChangeKey(T item, int newPriority)
+        public bool ChangeKey(T item, int newPriority)
         {
-            // TODO: Implement
+            int index = GetPosition(item);
+
+            if (index > 0)
+            {
+                _nodes[index].priority = newPriority;
+
+                if (index <= _size / 2)
+                {
+                    HeapifyDown(index);
+                }
+                else
+                {
+                    HeapifyUp(index);
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public int GetSize()
+        {
+            return _size;
         }
 
         private void HeapifyUp(int index)
@@ -184,6 +217,18 @@ namespace Almost_Shortest_Path.Tools
         {
             return _size == 0;
         }
+
+        private int GetPosition(T item)
+        {
+            try
+            {
+                return _positions[item];
+            }
+            catch
+            {
+                return -1;
+            }
+        }
         #endregion
 
         #region Override Methods
@@ -198,6 +243,10 @@ namespace Almost_Shortest_Path.Tools
             {
                 sb.Append(_nodes[i].ToString());
                 if (i < _size - 1)
+                {
+                    sb.Append(", ");
+                }
+                else
                 {
                     sb.Append(", ");
                 }

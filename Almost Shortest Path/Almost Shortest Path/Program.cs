@@ -8,18 +8,44 @@ namespace Almost_Shortest_Path
         {
             Tools.BinaryHeap<string> heap = new Tools.BinaryHeap<string>(100);
 
-            heap.Insert("Hello", 2);
-            heap.Insert("World", 3);
-            heap.Insert("Up", 6);
-            heap.Insert("Whats", 5);
-            heap.Insert("Doc", 4);
-            heap.Insert("Doc", 7);
-            heap.Insert("Bunny", 1);
+            Console.WriteLine(heap.ToString());
+
+            Console.WriteLine(string.Format("Our empty heap is of size {0}", heap.GetSize()));
+
+            heap.Insert("This", 1);
+            heap.Insert("Is", 2);
+            heap.Insert("A", 3);
+            heap.Insert("Min", 4);
+            heap.Insert("Heap", 5);
+            heap.Insert("Test", 6);
 
             Console.WriteLine(heap.ToString());
-            Console.WriteLine(string.Format("The minimum priority value of this tree is {0}.", heap.FindMin()));
-            heap.Delete(1);
+            
+            Console.WriteLine(string.Format("Our heap is of size {0}", heap.GetSize()));
+            
+            Console.WriteLine(string.Format("The minimum priority value of this tree is '{0}'.", heap.FindMin()));
+
+            heap.ExtractMin();
+
+            Console.WriteLine("Smallest priority deleted.");
+            
             Console.WriteLine(heap.ToString());
+
+            Console.WriteLine(string.Format("Now it is of size {0}", heap.GetSize()));
+
+            string key = "Test";
+            int newPriority = 1;
+
+            heap.ChangeKey(key, newPriority);
+
+            Console.WriteLine(string.Format("Key '{0}' priority changed to {1}.", key, newPriority));
+
+            Console.WriteLine(heap.ToString());
+
+            key = "This key does not exist";
+            newPriority = 999;
+
+            Console.WriteLine(string.Format("Attempt to change key '{0}' priority to {1} resulted in {2}", key, newPriority, heap.ChangeKey(key, newPriority)));
         }
     }
 }
