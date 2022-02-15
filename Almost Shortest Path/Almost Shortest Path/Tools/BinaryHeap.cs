@@ -24,16 +24,25 @@ namespace Almost_Shortest_Path.Tools
         #endregion
 
         #region Methods
-        public void Insert(T item, int priority)
+        public bool Insert(T item, int priority)
         {
-            int newIndex = _size + 1;
-            HeapNode<T> newNode = new HeapNode<T>(item, priority);
-            _positions.Add(item, newIndex);
+            try
+            {
+                int newIndex = _size + 1;
+                HeapNode<T> newNode = new HeapNode<T>(item, priority);
+                _positions.Add(item, newIndex);
 
-            _nodes[newIndex] = newNode;
-            HeapifyUp(newIndex);
-            
-            _size += 1;
+                _nodes[newIndex] = newNode;
+                HeapifyUp(newIndex);
+
+                _size += 1;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public T FindMin()
@@ -50,9 +59,11 @@ namespace Almost_Shortest_Path.Tools
             _size -= 1;
         }
 
-        public void ExtractMin()
+        public T ExtractMin()
         {
+            T min = FindMin();
             Delete(FindMin());
+            return min;
         }
 
         public bool Delete(T item)
