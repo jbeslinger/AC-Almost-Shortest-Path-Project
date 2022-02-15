@@ -17,6 +17,9 @@ namespace Almost_Shortest_Path
             heap.Insert("Bunny", 1);
 
             Console.WriteLine(heap.ToString());
-            Console.WriteLine(string.Format("The minimum priority value of this tree is {0}.", heap.FindMin()));        }
+            Console.WriteLine(string.Format("The minimum priority value of this tree is {0}.", heap.FindMin()));
+            heap.Delete(1);
+            Console.WriteLine(heap.ToString());
+        }
     }
 }

@@ -38,13 +38,16 @@ namespace Almost_Shortest_Path.Tools
 
         public T FindMin()
         {
-            // TODO: Implement
             return _nodes[1].data;
         }
 
         public void Delete(int index)
         {
-            // TODO: Implement
+            Swap(index, _size);
+            _nodes[_size] = null;
+            HeapifyDown(index);
+
+            _size -= 1;
         }
 
         public void ExtractMin()
@@ -62,10 +65,9 @@ namespace Almost_Shortest_Path.Tools
             // TODO: Implement
         }
 
-        private int Position(T item)
+        private int Position(HeapNode<T> item)
         {
-            // TODO: Implement
-            return -1;
+            return _nodeDict[item];
         }
 
         private void HeapifyUp(int index)
@@ -190,6 +192,9 @@ namespace Almost_Shortest_Path.Tools
         #endregion
 
         #region Override Methods
+        /// <summary>
+        /// Returns the heap in level order.
+        /// </summary>
         public override String ToString()
         {
             StringBuilder sb = new StringBuilder();
