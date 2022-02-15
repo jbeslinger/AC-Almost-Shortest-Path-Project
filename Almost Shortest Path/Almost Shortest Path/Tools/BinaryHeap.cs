@@ -17,95 +17,193 @@ namespace Almost_Shortest_Path.Tools
         #endregion
 
         #region Constructors
-        public BinaryHeap()
+        public BinaryHeap(int heapSize)
         {
-            StartHeap(100);
+            StartHeap(heapSize);
         }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Inserts the item, item, with an ordering value, value, into the heap at the end of the array, then uses Heapify_Up to position the item so as to maintain the heap order.
-        /// </summary>
         public void Insert(T item, int priority)
         {
-            // TODO: Implement
+            int newIndex = _size + 1;
+            HeapNode<T> newNode = new HeapNode<T>(item, priority);
+            _nodeDict.Add(newNode, newIndex);
+
+            _nodes[newIndex] = newNode;
+            HeapifyUp(newIndex);
+            
+            _size += 1;
         }
 
-        /// <summary>
-        /// Identifies the minimum element in the heap, which is located at index 1, but does not remove it.
-        /// </summary>
-        private T FindMin()
+        public T FindMin()
         {
             // TODO: Implement
-            return default(T);
+            return _nodes[1].data;
         }
 
-        /// <summary>
-        /// Deletes the element in the specified heap position by moving the item in the last array position to index, then using Heapify_Down to reposition that item.
-        /// </summary>
         public void Delete(int index)
         {
             // TODO: Implement
         }
 
-        /// <summary>
-        /// Identifies and deletes the element with the minimum key value, located at index 1, from the heap.
-        /// </summary>
         public void ExtractMin()
         {
             // TODO: Implement
         }
 
-        /// <summary>
-        /// Deletes the element item form the heap.
-        /// </summary>
         public void Delete(T item)
         {
             // TODO: Implement
         }
 
-        /// <summary>
-        /// Changes the key value of element v to newPriority.
-        /// </summary>
         public void ChangeKey(T item, int newPriority)
         {
             // TODO: Implement
         }
 
-        /// <summary>
-        /// Returns the index of the item provided.
-        /// </summary>
         private int Position(T item)
         {
             // TODO: Implement
-            return 0;
+            return -1;
         }
 
-        /// <summary>
-        /// Moves an element located at the specified index upwards in the heap to correctly reposition an element whose value is less than the value of its parent.
-        /// </summary>
-        private void Heapify_Up(int index)
+        private void HeapifyUp(int index)
         {
-            // TODO: Implement
+            int parentIdx = index / 2;
+            HeapNode<T> currentObj = _nodes[index];
+            while (index > 1)
+            {
+                HeapNode<T> parentObj = _nodes[parentIdx];
+                int res = currentObj.CompareTo(parentObj);
+                if (res < 0)
+                {
+                    Swap(index, parentIdx);
+                }
+                else
+                {
+                    break;
+                }
+                index = parentIdx;
+                parentIdx = index / 2;
+            }
         }
 
-        /// <summary>
-        /// Moves an element located at the specified index downwards in the heap to correctly reposition an element whose value is greater than the value of either of its children.
-        /// </summary>
-        private void Heapify_Down(int index)
+        private void HeapifyDown(int index)
         {
-            // TODO: Implement
+            HeapNode<T> currentObj = null;
+            if (!IsEmpty())
+            {
+                currentObj = _nodes[index];
+            }
+            while (index <= _size)
+            {
+                HeapNode<T> leftChild = GetLeftChild(index);
+                HeapNode<T> rightChild = GetRightChild(index);
+                int swapIdx = -1;
+                // If currentNode has a left and right child
+                if (leftChild != null && rightChild != null)
+                {
+                    // Do the checks
+                    int result = leftChild.CompareTo(rightChild);
+                    if (result <= 0)
+                    {
+                        result = leftChild.CompareTo(currentObj);
+                        if (result < 0)
+                        {
+                            swapIdx = index * 2;
+                        }
+                    }
+                    else
+                    {
+                        result = rightChild.CompareTo(currentObj);
+                        if (result < 0)
+                        {
+                            swapIdx = index * 2 + 1;
+                        }
+                    }
+                    // If the currentNode has just a left child
+                }
+                else if (leftChild != null)
+                {
+                    int result = leftChild.CompareTo(currentObj);
+                    if (result < 0)
+                    {
+                        swapIdx = index * 2;
+                    }
+                }
+
+                if (swapIdx != -1)
+                {
+                    Swap(index, swapIdx);
+                    index = swapIdx;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
-        /// <summary>
-        /// Initializes an empty heap that is set up to store at most N elements.
-        /// </summary>
         private void StartHeap(int n)
         {
             _nodes = new HeapNode<T>[n];
             _size = 0;
             _nodeDict = new Dictionary<HeapNode<T>, int>();
+        }
+
+        private void Swap(int idx1, int idx2)
+        {
+            HeapNode<T> node1 = _nodes[idx1];
+            HeapNode<T> node2 = _nodes[idx2];
+
+            _nodes[idx1] = node2;
+            _nodes[idx2] = node1;
+
+            _nodeDict[node1] = idx2;
+            _nodeDict[node2] = idx1;
+        }
+        private HeapNode<T> GetRightChild(int index)
+        {
+            int rightIdx = index * 2 + 1;
+            if (rightIdx <= _size)
+            {
+                return _nodes[rightIdx];
+            }
+            return null;
+        }
+
+        private HeapNode<T> GetLeftChild(int index)
+        {
+            int leftIdx = index * 2;
+            if (leftIdx <= _size)
+            {
+                return _nodes[leftIdx];
+            }
+            return null;
+        }
+
+        private bool IsEmpty()
+        {
+            return _size == 0;
+        }
+        #endregion
+
+        #region Override Methods
+        public override String ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            for (int i = 1; i < _size + 1; i++)
+            {
+                sb.Append(_nodes[i].ToString());
+                if (i < _size - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
         #endregion
 
@@ -117,10 +215,25 @@ namespace Almost_Shortest_Path.Tools
             public int priority;
             #endregion
 
+            #region Constructors
+            public HeapNode(E data, int priority)
+            {
+                this.data = data;
+                this.priority = priority;
+            }
+            #endregion
+
             #region Methods
             public int CompareTo(HeapNode<E> other)
             {
                 return this.priority.CompareTo(other.priority);
+            }
+            #endregion
+
+            #region Overrided Methods
+            public override string ToString()
+            {
+                return String.Format("[{0},{1}]", this.data, this.priority);
             }
             #endregion
         }
