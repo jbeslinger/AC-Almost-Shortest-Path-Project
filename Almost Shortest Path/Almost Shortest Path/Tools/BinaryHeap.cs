@@ -13,7 +13,7 @@ namespace Almost_Shortest_Path.Tools
         #region Members
         private HeapNode<T>[] _nodes;
         private int _size;
-        private Dictionary<HeapNode<T>, int> _nodeDict;
+        private Dictionary<T, int> _nodeDict;
         #endregion
 
         #region Constructors
@@ -28,7 +28,7 @@ namespace Almost_Shortest_Path.Tools
         {
             int newIndex = _size + 1;
             HeapNode<T> newNode = new HeapNode<T>(item, priority);
-            _nodeDict.Add(newNode, newIndex);
+            _nodeDict.Add(item, newIndex);
 
             _nodes[newIndex] = newNode;
             HeapifyUp(newIndex);
@@ -57,7 +57,7 @@ namespace Almost_Shortest_Path.Tools
 
         public void Delete(T item)
         {
-            // TODO: Implement
+            Delete(Position(item));
         }
 
         public void ChangeKey(T item, int newPriority)
@@ -65,7 +65,7 @@ namespace Almost_Shortest_Path.Tools
             // TODO: Implement
         }
 
-        private int Position(HeapNode<T> item)
+        private int Position(T item)
         {
             return _nodeDict[item];
         }
@@ -151,7 +151,7 @@ namespace Almost_Shortest_Path.Tools
         {
             _nodes = new HeapNode<T>[n];
             _size = 0;
-            _nodeDict = new Dictionary<HeapNode<T>, int>();
+            _nodeDict = new Dictionary<T, int>();
         }
 
         private void Swap(int idx1, int idx2)
@@ -162,8 +162,8 @@ namespace Almost_Shortest_Path.Tools
             _nodes[idx1] = node2;
             _nodes[idx2] = node1;
 
-            _nodeDict[node1] = idx2;
-            _nodeDict[node2] = idx1;
+            _nodeDict[node1.data] = idx2;
+            _nodeDict[node2.data] = idx1;
         }
         private HeapNode<T> GetRightChild(int index)
         {
