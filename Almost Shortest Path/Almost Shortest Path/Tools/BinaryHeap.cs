@@ -29,11 +29,20 @@ namespace Almost_Shortest_Path.Tools
             try
             {
                 int newIndex = _size + 1;
+
                 HeapNode<T> newNode = new HeapNode<T>(item, priority);
                 _positions.Add(item, newIndex);
 
                 _nodes[newIndex] = newNode;
                 HeapifyUp(newIndex);
+
+                int parentIndex = (int)Math.Round((double)(newIndex - 1) / 2.0, MidpointRounding.AwayFromZero);
+                newNode.parent = _nodes[parentIndex];
+
+                if (newIndex > 1)
+                {
+                    newNode.previous = _nodes[newIndex - 1];
+                }
 
                 _size += 1;
 
@@ -204,6 +213,7 @@ namespace Almost_Shortest_Path.Tools
             _positions[node1.data] = idx2;
             _positions[node2.data] = idx1;
         }
+
         private HeapNode<T> GetRightChild(int index)
         {
             int rightIdx = index * 2 + 1;
@@ -273,6 +283,12 @@ namespace Almost_Shortest_Path.Tools
             #region Fields
             public E data;
             public int priority;
+            public HeapNode<E> parent;
+            public HeapNode<E> previous;
+            #endregion
+
+            #region Members
+
             #endregion
 
             #region Constructors
