@@ -46,6 +46,16 @@ namespace Almost_Shortest_Path.Tools
         {
             return _heap.GetSize();
         }
+
+        public bool ChangePriority(T item, int priority)
+        {
+            return _heap.ChangeKey(item, priority);
+        }
+
+        public override String ToString()
+        {
+            return _heap.ToString();
+        }
         #endregion
     }
 }

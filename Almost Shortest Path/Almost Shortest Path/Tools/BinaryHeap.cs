@@ -37,12 +37,6 @@ namespace Almost_Shortest_Path.Tools
                 HeapifyUp(newIndex);
 
                 int parentIndex = (int)Math.Round((double)(newIndex - 1) / 2.0, MidpointRounding.AwayFromZero);
-                newNode.parent = _nodes[parentIndex];
-
-                if (newIndex > 1)
-                {
-                    newNode.previous = _nodes[newIndex - 1];
-                }
 
                 _size += 1;
 
@@ -283,8 +277,6 @@ namespace Almost_Shortest_Path.Tools
             #region Fields
             public E data;
             public int priority;
-            public HeapNode<E> parent;
-            public HeapNode<E> previous;
             #endregion
 
             #region Members
