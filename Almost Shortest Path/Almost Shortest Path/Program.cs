@@ -9,6 +9,8 @@ namespace Almost_Shortest_Path
     {
         static void Main(string[] args)
         {
+
+
             string in1 =
                 "7 9\n" +
                 "0 6\n" +
