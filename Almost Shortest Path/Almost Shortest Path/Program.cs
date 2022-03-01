@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 
 namespace Almost_Shortest_Path
@@ -9,51 +10,49 @@ namespace Almost_Shortest_Path
     {
         static void Main(string[] args)
         {
+            if (args.Length != 1)
+            {
+                Console.WriteLine("Please provide a file to the executable.");
+                return;
+            }
 
+            List<WeightedGraph> graphs = ParseGraphs(args[0]);
 
-            string in1 =
-                "7 9\n" +
-                "0 6\n" +
-                "0 1 1\n" +
-                "0 2 1\n" +
-                "0 3 2\n" +
-                "0 4 3\n" +
-                "1 5 2\n" +
-                "2 6 4\n" +
-                "3 6 2\n" +
-                "4 6 4\n" +
-                "5 6 1";
+            foreach (WeightedGraph graph in graphs)
+            {
+                Console.WriteLine(AlmostShortestPath(graph, graph.startVert, graph.endVert));
+            }
 
-            string in2 =
-                "4 6\n" +
-                "0 2\n" +
-                "0 1 1\n" +
-                "1 2 1\n" +
-                "1 3 1\n" +
-                "3 2 1\n" +
-                "2 0 3\n" +
-                "3 0 2";
+            Console.ReadLine();
+        }
 
-            string in3 =
-                "6 8\n" +
-                "0 1\n" +
-                "0 1 1\n" +
-                "0 2 2\n" +
-                "0 3 3\n" +
-                "2 5 3\n" +
-                "3 4 2\n" +
-                "4 1 1\n" +
-                "5 1 1\n" +
-                "3 0 1";
+        static private List<WeightedGraph> ParseGraphs(string path)
+        {
+            List<WeightedGraph> graphs = new List<WeightedGraph>();
+            string fileContent = File.ReadAllText(@path);
+            string[] lines = fileContent.Split("\n");
 
-            WeightedGraph g1 = ToGraph(in1);
-            Console.WriteLine(string.Format("The resulting shortest path is {0}.", AlmostShortestPath(g1, g1.startVert, g1.endVert)));
+            StringBuilder sb = new StringBuilder();
 
-            WeightedGraph g2 = ToGraph(in2);
-            Console.WriteLine(string.Format("The resulting shortest path is {0}.", AlmostShortestPath(g2, g2.startVert, g2.endVert)));
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i] == "0 0")
+                {
+                    break;
+                }
+                else
+                {
+                    int edgeCount = Convert.ToInt32(lines[i].Split(" ")[1]);
+                    for (int j = 0; j < edgeCount + 2; j++)
+                    {
+                        sb.Append(lines[j]);
+                        graphs.Add(ToGraph(sb.ToString()));
+                    }
+                    i = edgeCount;
+                }
+            }
 
-            WeightedGraph g3 = ToGraph(in3);
-            Console.WriteLine(string.Format("The resulting shortest path is {0}.", AlmostShortestPath(g3, g3.startVert, g3.endVert)));
+            return graphs;
         }
 
         static List<Vertex> edgesToDelete = new List<Vertex>();
