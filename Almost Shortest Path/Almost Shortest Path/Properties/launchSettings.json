@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Almost Shortest Path": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\jbesl\\Downloads\\INPUT.txt\""
     }
   }
 }

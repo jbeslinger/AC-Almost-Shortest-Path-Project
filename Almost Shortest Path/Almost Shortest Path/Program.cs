@@ -13,6 +13,7 @@ namespace Almost_Shortest_Path
             if (args.Length != 1)
             {
                 Console.WriteLine("Please provide a file to the executable.");
+                Console.ReadLine();
                 return;
             }
 
@@ -34,7 +35,7 @@ namespace Almost_Shortest_Path
 
             StringBuilder sb = new StringBuilder();
 
-            for (int i = 0; i < lines.Length; i++)
+            for (uint i = 0; i < lines.Length; i++)
             {
                 if (lines[i] == "0 0")
                 {
@@ -42,13 +43,14 @@ namespace Almost_Shortest_Path
                 }
                 else
                 {
-                    int edgeCount = Convert.ToInt32(lines[i].Split(" ")[1]);
-                    for (int j = 0; j < edgeCount + 2; j++)
+                    uint edgeCount = (uint) Convert.ToInt32(lines[i].Split(" ")[1]);
+                    for (uint j = i; j < i + edgeCount + 2; j++)
                     {
-                        sb.Append(lines[j]);
-                        graphs.Add(ToGraph(sb.ToString()));
+                        sb.Append(lines[j].Replace('\r', '\n'));
                     }
-                    i = edgeCount;
+                    graphs.Add(ToGraph(sb.ToString().TrimEnd('\n'), i));
+                    i += edgeCount + 1;
+                    sb.Clear();
                 }
             }
 
@@ -59,12 +61,20 @@ namespace Almost_Shortest_Path
         static public int AlmostShortestPath(WeightedGraph graph, int start, int destination)
         {
             edgesToDelete.Clear();
-            int shortestPath = Dijkstra(graph.GetEdges(), start, destination);
+            int shortestPath = Dijkstra(graph, start, destination);
+
+            if (shortestPath == -1 || shortestPath == 0)
+            {
+                return -1;
+            }
+
             int almostShortestPath = 0;
             while (true)
             {
                 graph.RemoveEdges(edgesToDelete);
-                almostShortestPath = Dijkstra(graph.GetEdges(), start, destination);
+
+                almostShortestPath = Dijkstra(graph, start, destination);
+
                 if (shortestPath != almostShortestPath)
                 {
                     break;
@@ -73,10 +83,16 @@ namespace Almost_Shortest_Path
             return almostShortestPath;
         }
 
-        static public int Dijkstra(int[][] vertices, int start, int destination)
+        static public int Dijkstra(WeightedGraph graph, int start, int destination)
         {
+            if (!graph.ContainsStartVert() || !graph.ContainsEndVert())
+            {
+                return -1;
+            }
+
             Dictionary<int, Dictionary<int, int>> edges = new Dictionary<int, Dictionary<int, int>>();
 
+            int[][] vertices = graph.GetEdges();
             for (int i = 0; i < vertices.Length; i++)
             {
                 int u = vertices[i][0], v = vertices[i][1], w = vertices[i][2];
@@ -109,11 +125,17 @@ namespace Almost_Shortest_Path
                         pq.Enqueue(new Vertex(u.v, neighbor.Key, u.w + neighbor.Value, u), u.w + neighbor.Value);
                     }
                 }
+
+                // Failsafe to capture memory leak; logically speaking, the PQ should never grow to this size
+                if (pq.GetSize() > Math.Pow(graph.edgeCount, 2))
+                {
+                    return -1;
+                }
             }
             return -1;
         }
 
-        static public WeightedGraph ToGraph(string input)
+        static public WeightedGraph ToGraph(string input, uint lineNumber)
         {
             try
             {
@@ -135,12 +157,15 @@ namespace Almost_Shortest_Path
                         graph[i][j] = Convert.ToInt32(row[j]);
                     }
                 }
-                
+
                 return new WeightedGraph(vertCount, edgeCount, startVert, endVert, graph);
             }
             catch
             {
-                throw new InvalidInputException("Your input string does not match the required format:\n'0 0'\n'0 0'\n'0 0 0'\n'0 0 0' ...");
+                Console.WriteLine("Your input string does not match the required format:\n'0 0'\n'0 0'\n'0 0 0'\n'0 0 0' ...");
+                Console.ReadLine();
+                Environment.Exit(1);
+                return new WeightedGraph();
             }
         }
 
@@ -190,6 +215,57 @@ namespace Almost_Shortest_Path
                         this.edgeCount -= 1;
                     }
                 }
+            }
+
+            public bool ContainsVertex(int vert)
+            {
+                if (edgeCount < 1)
+                {
+                    return false;
+                }
+
+                foreach (Vertex u in _edges)
+                {
+                    if (u.u == vert || u.v == vert)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public bool ContainsStartVert()
+            {
+                if (edgeCount < 1)
+                {
+                    return false;
+                }
+
+                foreach (Vertex u in _edges)
+                {
+                    if (u.u == startVert)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public bool ContainsEndVert()
+            {
+                if (edgeCount < 1)
+                {
+                    return false;
+                }
+
+                foreach (Vertex u in _edges)
+                {
+                    if (u.u == endVert || u.v == endVert)
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 

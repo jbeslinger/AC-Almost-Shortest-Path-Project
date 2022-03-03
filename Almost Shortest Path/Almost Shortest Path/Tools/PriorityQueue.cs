@@ -7,7 +7,7 @@ namespace Almost_Shortest_Path.Tools
     class PriorityQueue<T>
     {
         #region Constants
-        private const int QUEUE_SIZE = 256;
+        private const int QUEUE_SIZE = 999999999;
         #endregion
 
         #region Members
