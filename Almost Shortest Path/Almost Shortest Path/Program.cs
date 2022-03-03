@@ -25,7 +25,7 @@ namespace Almost_Shortest_Path
                 Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.", AlmostShortestPath(graph, graph.startVert, graph.endVert)));
             }
 
-            Console.Write("Done! Press any key to exit.");
+            Console.Write("Done! Press return to exit.");
             Console.ReadLine();
         }
 
