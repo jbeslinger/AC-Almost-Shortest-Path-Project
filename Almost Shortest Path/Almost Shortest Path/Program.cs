@@ -22,7 +22,7 @@ namespace Almost_Shortest_Path
             foreach (WeightedGraph graph in graphs)
             {
                 Console.WriteLine(string.Format("Graph has {0} vertices, {1} edges, begins on {2} and ends on {3}:", graph.vertCount, graph.edgeCount, graph.startVert, graph.endVert));
-                Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.", AlmostShortestPath(graph, graph.startVert, graph.endVert)));
+                Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.\n", AlmostShortestPath(graph, graph.startVert, graph.endVert)));
             }
 
             Console.Write("Done! Press return to exit.");
@@ -32,7 +32,8 @@ namespace Almost_Shortest_Path
         static private List<WeightedGraph> ParseGraphs(string path)
         {
             List<WeightedGraph> graphs = new List<WeightedGraph>();
-            string fileContent = File.ReadAllText(@path).Replace('\r', '\n');
+            string fileContent = File.ReadAllText(@path);
+            fileContent = fileContent.Replace("\r", "");
             string[] lines = fileContent.Split("\n");
 
             StringBuilder sb = new StringBuilder();
