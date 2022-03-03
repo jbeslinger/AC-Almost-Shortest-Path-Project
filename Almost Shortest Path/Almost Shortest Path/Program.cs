@@ -17,14 +17,19 @@ namespace Almost_Shortest_Path
                 return;
             }
 
-            List<WeightedGraph> graphs = ParseGraphs(args[0]);
+            string path = @args[0];
+            List<WeightedGraph> graphs = ParseGraphs(path);
+            StreamWriter writer = new StreamWriter(@"output.txt");
 
             foreach (WeightedGraph graph in graphs)
             {
                 Console.WriteLine(string.Format("Graph has {0} vertices, {1} edges, begins on {2} and ends on {3}:", graph.vertCount, graph.edgeCount, graph.startVert, graph.endVert));
-                Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.\n", AlmostShortestPath(graph, graph.startVert, graph.endVert)));
+                int res = AlmostShortestPath(graph, graph.startVert, graph.endVert);
+                writer.WriteLine(res);
+                Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.\n", res));
             }
 
+            writer.Close();
             Console.Write("Done! Press return to exit.");
             Console.ReadLine();
         }
