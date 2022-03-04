@@ -2,7 +2,7 @@
   "profiles": {
     "Almost Shortest Path": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\jbesl\\Downloads\\AlmostShortestPath\\INPUT.txt\""
+      "commandLineArgs": "\"C:\\Users\\jbesl\\Downloads\\AlmostShortestPathProgram\\DEBUG_INPUT.txt\""
     }
   }
 }

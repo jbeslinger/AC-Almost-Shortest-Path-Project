@@ -56,7 +56,7 @@ namespace Almost_Shortest_Path
                     {
                         sb.Append(lines[j] + '\n');
                     }
-                    graphs.Add(ToGraph(sb.ToString().TrimEnd('\n'), i));
+                    graphs.Add(new WeightedGraph(sb.ToString().TrimEnd('\n'), i));
                     i += edgeCount + 1;
                     sb.Clear();
                 }
@@ -65,254 +65,166 @@ namespace Almost_Shortest_Path
             return graphs;
         }
 
-        static List<Vertex> edgesToDelete = new List<Vertex>();
         static public int AlmostShortestPath(WeightedGraph graph, int start, int destination)
         {
-            edgesToDelete.Clear();
-            int shortestPath = Dijkstra(graph, start, destination);
-
-            if (shortestPath == -1 || shortestPath == 0)
-            {
-                return -1;
-            }
-
-            int almostShortestPath = 0;
-            while (true)
-            {
-                graph.RemoveEdges(edgesToDelete);
-
-                almostShortestPath = Dijkstra(graph, start, destination);
-
-                if (shortestPath != almostShortestPath)
-                {
-                    break;
-                }
-            }
-            return almostShortestPath;
+            return Dijkstra(graph, start, destination).Item1[destination];
         }
 
-        static public int Dijkstra(WeightedGraph graph, int start, int destination)
+        static public (int[], List<int>[]) Dijkstra(WeightedGraph graph, int start, int destination)
         {
+            const int INFINITY = Int32.MaxValue;
+            const int UNDEFINED = -1;
+
+            int[] dist = new int[graph.vertCount];
+            List<int>[] prev = new List<int>[graph.vertCount];
+
             if (!graph.ContainsStartVert() || !graph.ContainsEndVert())
             {
-                return -1;
+                dist[0] = -1;
+                return (dist, prev);
             }
 
-            Dictionary<int, Dictionary<int, int>> edges = new Dictionary<int, Dictionary<int, int>>();
+            Tools.PriorityQueue<int> pq = new Tools.PriorityQueue<int>();
+            pq.Enqueue(start, 0);
 
-            int[][] vertices = graph.GetEdges();
-            for (int i = 0; i < vertices.Length; i++)
+            foreach (var v in graph.vertices)
             {
-                int u = vertices[i][0], v = vertices[i][1], w = vertices[i][2];
-                if (!edges.ContainsKey(u)) edges[u] = new Dictionary<int, int>();
-                edges[u].Add(v, w);
+                if (v != start)
+                {
+                    dist[v] = INFINITY;
+                    prev[v] = new List<int>();
+                    prev[v].Add(UNDEFINED);
+                }
+                pq.Enqueue(v, dist[v]);
             }
-
-            Tools.PriorityQueue<Vertex> pq = new Tools.PriorityQueue<Vertex>();
-            pq.Enqueue(new Vertex(start, 0, 0, null), 0);
 
             while (!pq.IsEmpty())
             {
-                Vertex u = pq.Dequeue();
-                if (u.v == destination)
+                int u = pq.Dequeue();
+                foreach (int v in graph.GetNeighbors(u))
                 {
-                    Vertex current = u;
-                    while (current.previous != null)
+                    int alt = dist[u] + graph.edges[(u, v)];
+                    if (alt < dist[v])
                     {
-                        edgesToDelete.Add(current);
-                        current = current.previous;
+                        dist[v] = alt;
+                        prev[v].Clear();
+                        prev[v].Add(u);
+                        pq.ChangePriority(v, alt);
                     }
-
-                    return u.w;
-                }
-
-                if (edges.ContainsKey(u.v))
-                {
-                    foreach (var neighbor in edges[u.v])
+                    else if (alt == dist[v])
                     {
-                        pq.Enqueue(new Vertex(u.v, neighbor.Key, u.w + neighbor.Value, u), u.w + neighbor.Value);
+                        dist[v] = alt;
+                        prev[v].Add(u);
                     }
                 }
-
-                // Failsafe to capture memory leak; logically speaking, the PQ should never grow to this size
-                if (pq.GetSize() > Math.Pow(graph.edgeCount, 2))
-                {
-                    return -1;
-                }
             }
-            return -1;
-        }
 
-        static public WeightedGraph ToGraph(string input, uint lineNumber)
-        {
-            try
-            {
-                var values = input.Split('\n');
-
-                int vertCount = Convert.ToInt32(values[0].Split(' ')[0]);
-                int edgeCount = Convert.ToInt32(values[0].Split(' ')[1]);
-                int startVert = Convert.ToInt32(values[1].Split(' ')[0]);
-                int endVert = Convert.ToInt32(values[1].Split(' ')[1]);
-
-                int[][] graph = new int[edgeCount][];
-                for (int i = 0; i < edgeCount; i++)
-                {
-                    graph[i] = new int[3];
-                    var row = values[i + 2].Split(' ');
-
-                    for (int j = 0; j < 3; j++)
-                    {
-                        graph[i][j] = Convert.ToInt32(row[j]);
-                    }
-                }
-
-                return new WeightedGraph(vertCount, edgeCount, startVert, endVert, graph);
-            }
-            catch
-            {
-                Console.WriteLine("Your input string does not match the required format:\n'0 0'\n'0 0'\n'0 0 0'\n'0 0 0' ...");
-                Console.ReadLine();
-                Environment.Exit(1);
-                return new WeightedGraph();
-            }
+            return (dist, prev);
         }
 
         public struct WeightedGraph
         {
             public int vertCount, edgeCount, startVert, endVert;
             
-            private List<Vertex> _edges;
+            public Dictionary<(int, int), int> edges;
+            public List<int> vertices;
 
-            public WeightedGraph(int vertCount, int edgeCount, int startVert, int endVert, int[][] edges)
+            public WeightedGraph(string input, uint lineNumber)
             {
+                int vertCount = -1;
+                int edgeCount = -1;
+                int startVert = -1;
+                int endVert = -1;
+                this.edges = new Dictionary<(int, int), int>();
+                this.vertices = new List<int>();
+
+                try
+                {
+                    var values = input.Split('\n');
+
+                    vertCount = Convert.ToInt32(values[0].Split(' ')[0]);
+                    edgeCount = Convert.ToInt32(values[0].Split(' ')[1]);
+                    startVert = Convert.ToInt32(values[1].Split(' ')[0]);
+                    endVert = Convert.ToInt32(values[1].Split(' ')[1]);
+
+                    for (int i = 0; i < edgeCount; i++)
+                    {
+                        int v1, v2;
+                        int w;
+
+                        var row = values[i + 2].Split(' ');
+                        v1 = Convert.ToInt32(row[0]);
+                        v2 = Convert.ToInt32(row[1]);
+                        w = Convert.ToInt32(row[2]);
+
+                        edges.Add((v1, v2), w);
+                    }
+
+                    foreach (var edge in edges)
+                    {
+                        int v1, v2;
+                        v1 = edge.Key.Item1;
+                        v2 = edge.Key.Item2;
+                        if (!vertices.Contains(v1))
+                        {
+                            vertices.Add(v1);
+                        }
+                        if (!vertices.Contains(v2))
+                        {
+                            vertices.Add(v2);
+                        }
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Your input string does not match the required format:\n'0 0'\n'0 0'\n'0 0 0'\n'0 0 0' ...");
+                    Console.ReadLine();
+                    Environment.Exit(1);
+                }
+
                 this.vertCount = vertCount;
                 this.edgeCount = edgeCount;
                 this.startVert = startVert;
                 this.endVert = endVert;
-
-                this._edges = new List<Vertex>();
-
-                for (int i = 0; i < edgeCount; i++)
-                {
-                    Vertex n = new Vertex(edges[i][0], edges[i][1], edges[i][2]);
-                    _edges.Add(n);
-                }
             }
 
-            public int[][] GetEdges()
+            public void RemoveEdges(List<(int, int)> edges)
             {
-                int[][] graph = new int[edgeCount][];
-                int i = 0;
-                foreach (Vertex n in _edges)
+                foreach (var edge in edges)
                 {
-                    graph[i] = new int[3];
-                    graph[i][0] = n.u;
-                    graph[i][1] = n.v;
-                    graph[i][2] = n.w;
-                    i++;
-                }
-                return graph;
-            }
-
-            public void RemoveEdges(List<Vertex> vertices)
-            {
-                foreach (Vertex n in vertices)
-                {
-                    if (_edges.Remove(n))
+                    if (this.edges.Remove(edge))
                     {
                         this.edgeCount -= 1;
                     }
                 }
             }
 
-            public bool ContainsVertex(int vert)
+            public List<int> GetNeighbors(int vertex)
             {
-                if (edgeCount < 1)
+                List<int> neighbors = new List<int>();
+                foreach (var edge in this.edges)
                 {
-                    return false;
-                }
-
-                foreach (Vertex u in _edges)
-                {
-                    if (u.u == vert || u.v == vert)
+                    if (edge.Key.Item1 == vertex)
                     {
-                        return true;
+                        neighbors.Add(edge.Key.Item2);
                     }
                 }
-                return false;
+                return neighbors;
+            }
+
+            public bool ContainsVertex(int v)
+            {
+                return this.vertices.Contains(v);
             }
 
             public bool ContainsStartVert()
             {
-                if (edgeCount < 1)
-                {
-                    return false;
-                }
-
-                foreach (Vertex u in _edges)
-                {
-                    if (u.u == startVert)
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                return this.vertices.Contains(startVert);
             }
 
             public bool ContainsEndVert()
             {
-                if (edgeCount < 1)
-                {
-                    return false;
-                }
-
-                foreach (Vertex u in _edges)
-                {
-                    if (u.u == endVert || u.v == endVert)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-
-        public class Vertex : IComparable<Vertex>
-        {
-            public int u, v, w;
-            public Vertex previous;
-
-            public Vertex(int u, int v, int w)
-            {
-                this.u = u;
-                this.v = v;
-                this.w = w;
-            }
-
-            public Vertex(int u, int v, int w, Vertex previous)
-            {
-                this.u = u;
-                this.v = v;
-                this.w = w;
-                this.previous = previous;
-            }
-
-            public override bool Equals(Object obj)
-            {
-                if (obj == null)
-                {
-                    return false;
-                }
-                if (!(obj is Vertex))
-                {
-                    return false;
-                }
-                return (this.u == ((Vertex)obj).u && this.v == ((Vertex)obj).v);
-            }
-
-            public int CompareTo(Vertex other)
-            {
-                return w.CompareTo(other.w);
+                return this.vertices.Contains(endVert);
             }
         }
     }
