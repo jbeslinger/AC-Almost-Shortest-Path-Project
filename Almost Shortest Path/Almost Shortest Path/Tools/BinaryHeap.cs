@@ -87,7 +87,7 @@ namespace Almost_Shortest_Path.Tools
         {
             int index = GetPosition(item);
 
-            if (index > 0)
+            if (index > 0 && _nodes[index] != null)
             {
                 _nodes[index].priority = newPriority;
 

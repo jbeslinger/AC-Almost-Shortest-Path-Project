@@ -109,12 +109,6 @@ namespace Almost_Shortest_Path
             int[] dist = new int[graph.vertCount];
             List<List<int>>[] prev = new List<List<int>>[graph.vertCount];
 
-            if (!graph.ContainsStartVert() || !graph.ContainsEndVert())
-            {
-                dist[0] = -1;
-                return (dist, prev);
-            }
-
             Tools.PriorityQueue<int> pq = new Tools.PriorityQueue<int>();
             pq.Enqueue(start, 0);
 
@@ -246,21 +240,6 @@ namespace Almost_Shortest_Path
                     }
                 }
                 return neighbors;
-            }
-
-            public bool ContainsVertex(int v)
-            {
-                return this.vertices.Contains(v);
-            }
-
-            public bool ContainsStartVert()
-            {
-                return this.vertices.Contains(startVert);
-            }
-
-            public bool ContainsEndVert()
-            {
-                return this.vertices.Contains(endVert);
             }
         }
     }
