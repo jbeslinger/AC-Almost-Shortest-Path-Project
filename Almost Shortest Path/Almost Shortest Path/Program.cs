@@ -102,7 +102,7 @@ namespace Almost_Shortest_Path
         static public (int[], List<List<int>>[]) Dijkstra(WeightedGraph graph, int start, int destination)
         {
             const int INFINITY = Int32.MaxValue;
-            const int UNDEFINED = -1;
+            const int UNDEFINED = -999;
 
             int[] pathCounts = new int[graph.vertCount];
 
@@ -112,14 +112,14 @@ namespace Almost_Shortest_Path
             Tools.PriorityQueue<int> pq = new Tools.PriorityQueue<int>();
             pq.Enqueue(start, 0);
 
-            foreach (var v in graph.vertices)
+            for (int v = 0; v < graph.vertCount; v++)
             {
                 if (v != start)
                 {
                     dist[v] = INFINITY;
-                    prev[v] = new List<List<int>>();
-                    prev[v].Add(new List<int>() { UNDEFINED });
                 }
+                prev[v] = new List<List<int>>();
+                prev[v].Add(new List<int>() { UNDEFINED });
                 pq.Enqueue(v, dist[v]);
             }
 
@@ -138,8 +138,7 @@ namespace Almost_Shortest_Path
                     }
                     else if (alt == dist[v])
                     {
-                        dist[v] = alt;
-                        prev[v].Add(new List<int>(prev[v][pathCounts[v]]));
+                        prev[v].Add(new List<int>());
                         pathCounts[v] += 1;
                         prev[v][pathCounts[v]].Add(u);
                     }
@@ -147,7 +146,7 @@ namespace Almost_Shortest_Path
             }
 
             for (int i = 0; i < dist.Length; i++)
-                dist[i] = dist[i] == Int32.MaxValue ? -1 : dist[i];
+                dist[i] = dist[i] == Int32.MaxValue || dist[i] < 0 ? -1 : dist[i];
 
             return (dist, prev);
         }
