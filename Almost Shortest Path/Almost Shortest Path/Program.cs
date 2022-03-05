@@ -67,16 +67,19 @@ namespace Almost_Shortest_Path
 
         static public int AlmostShortestPath(WeightedGraph graph, int start, int destination)
         {
-            return Dijkstra(graph, start, destination).Item1[destination];
+            var res = Dijkstra(graph, start, destination);
+            return res.Item1[destination];
         }
 
-        static public (int[], List<int>[]) Dijkstra(WeightedGraph graph, int start, int destination)
+        static public (int[], List<List<int>>[]) Dijkstra(WeightedGraph graph, int start, int destination)
         {
             const int INFINITY = Int32.MaxValue;
             const int UNDEFINED = -1;
 
+            int[] pathCounts = new int[graph.vertCount];
+
             int[] dist = new int[graph.vertCount];
-            List<int>[] prev = new List<int>[graph.vertCount];
+            List<List<int>>[] prev = new List<List<int>>[graph.vertCount];
 
             if (!graph.ContainsStartVert() || !graph.ContainsEndVert())
             {
@@ -92,8 +95,8 @@ namespace Almost_Shortest_Path
                 if (v != start)
                 {
                     dist[v] = INFINITY;
-                    prev[v] = new List<int>();
-                    prev[v].Add(UNDEFINED);
+                    prev[v] = new List<List<int>>();
+                    prev[v].Add(new List<int>() { UNDEFINED });
                 }
                 pq.Enqueue(v, dist[v]);
             }
@@ -107,14 +110,16 @@ namespace Almost_Shortest_Path
                     if (alt < dist[v])
                     {
                         dist[v] = alt;
-                        prev[v].Clear();
-                        prev[v].Add(u);
+                        prev[v][pathCounts[v]].Clear();
+                        prev[v][pathCounts[v]].Add(u);
                         pq.ChangePriority(v, alt);
                     }
                     else if (alt == dist[v])
                     {
                         dist[v] = alt;
-                        prev[v].Add(u);
+                        prev[v].Add(new List<int>(prev[v][pathCounts[v]]));
+                        pathCounts[v] += 1;
+                        prev[v][pathCounts[v]].Add(u);
                     }
                 }
             }
