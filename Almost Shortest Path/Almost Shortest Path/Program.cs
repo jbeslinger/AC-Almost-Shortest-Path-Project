@@ -67,7 +67,35 @@ namespace Almost_Shortest_Path
 
         static public int AlmostShortestPath(WeightedGraph graph, int start, int destination)
         {
+            // Run Dijkstra's algo
             var res = Dijkstra(graph, start, destination);
+            Console.WriteLine(string.Format("Shortest path on this graph is {0}.", res.Item1[destination]));
+
+            // Get a list of all edges to remove, that is every shortest path
+            List<(int, int)> edgesToRemove = new List<(int, int)>();
+            foreach (var shortestPath in res.Item2[destination])
+            {
+                foreach (var vertex in shortestPath)
+                {
+                    int vIdx = shortestPath.IndexOf(vertex);
+                    if (vIdx == 0)
+                    {
+                        edgesToRemove.Add((start, vertex));
+                    }
+                    if (vIdx == shortestPath.Count - 1)
+                    {
+                        edgesToRemove.Add((vertex, destination));
+                    }
+                    else
+                    {
+                        edgesToRemove.Add((vertex, shortestPath[vIdx + 1]));
+                    }
+                }
+            }
+
+            // Remove the edges and run Dijkstra again
+            graph.RemoveEdges(edgesToRemove);
+            res = Dijkstra(graph, start, destination);
             return res.Item1[destination];
         }
 
@@ -123,6 +151,9 @@ namespace Almost_Shortest_Path
                     }
                 }
             }
+
+            for (int i = 0; i < dist.Length; i++)
+                dist[i] = dist[i] == Int32.MaxValue ? -1 : dist[i];
 
             return (dist, prev);
         }
