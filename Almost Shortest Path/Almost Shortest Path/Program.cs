@@ -23,14 +23,15 @@ namespace Almost_Shortest_Path
 
             foreach (WeightedGraph graph in graphs)
             {
-                Console.WriteLine(string.Format("Graph has {0} vertices, {1} edges, begins on {2} and ends on {3}:", graph.vertCount, graph.edgeCount, graph.startVert, graph.endVert));
+                //Console.WriteLine(string.Format("Graph has {0} vertices, {1} edges, begins on {2} and ends on {3}:", graph.vertCount, graph.edgeCount, graph.startVert, graph.endVert));
                 int res = AlmostShortestPath(graph, graph.startVert, graph.endVert);
                 writer.WriteLine(res);
-                Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.\n", res));
+                //Console.WriteLine(string.Format("Almost shortest path of this graph is of length {0}.\n", res));
+                Console.WriteLine(res);
             }
 
             writer.Close();
-            Console.Write("Done! Press return to exit.");
+            //Console.Write("Done! Press return to exit.");
             Console.ReadLine();
         }
 
@@ -69,28 +70,24 @@ namespace Almost_Shortest_Path
         {
             // Run Dijkstra's algo
             var res = Dijkstra(graph, start, destination);
-            Console.WriteLine(string.Format("Shortest path on this graph is {0}.", res.Item1[destination]));
+            //Console.WriteLine(string.Format("Shortest path on this graph is {0}.", res.Item1[destination]));
 
             // Get a list of all edges to remove, that is every shortest path
             List<(int, int)> edgesToRemove = new List<(int, int)>();
-            foreach (var shortestPath in res.Item2[destination])
+            if (destination < res.Item2.Length)
             {
-                foreach (var vertex in shortestPath)
+                for (int i = 0; i < res.Item2.Length; i++)
                 {
-                    int vIdx = shortestPath.IndexOf(vertex);
-                    if (vIdx == 0)
+                    if (res.Item2[i].id == destination)
                     {
-                        edgesToRemove.Add((start, vertex));
-                    }
-                    if (vIdx == shortestPath.Count - 1)
-                    {
-                        edgesToRemove.Add((vertex, destination));
-                    }
-                    else
-                    {
-                        edgesToRemove.Add((vertex, shortestPath[vIdx + 1]));
+                        res.Item2[i].ToEdges(edgesToRemove);
+                        break;
                     }
                 }
+            }
+            else
+            {
+                return -1;
             }
 
             // Remove the edges and run Dijkstra again
@@ -99,15 +96,12 @@ namespace Almost_Shortest_Path
             return res.Item1[destination];
         }
 
-        static public (int[], List<List<int>>[]) Dijkstra(WeightedGraph graph, int start, int destination)
+        static public (int[], Vertex[]) Dijkstra(WeightedGraph graph, int start, int destination)
         {
             const int INFINITY = Int32.MaxValue;
-            const int UNDEFINED = -999;
 
             int[] pathCounts = new int[graph.vertCount];
-
             int[] dist = new int[graph.vertCount];
-            List<List<int>>[] prev = new List<List<int>>[graph.vertCount];
 
             Tools.PriorityQueue<int> pq = new Tools.PriorityQueue<int>();
             pq.Enqueue(start, 0);
@@ -118,8 +112,6 @@ namespace Almost_Shortest_Path
                 {
                     dist[v] = INFINITY;
                 }
-                prev[v] = new List<List<int>>();
-                prev[v].Add(new List<int>() { UNDEFINED });
                 pq.Enqueue(v, dist[v]);
             }
 
@@ -132,15 +124,13 @@ namespace Almost_Shortest_Path
                     if (alt < dist[v])
                     {
                         dist[v] = alt;
-                        prev[v][pathCounts[v]].Clear();
-                        prev[v][pathCounts[v]].Add(u);
+                        graph.GetVertex(v).parents.Clear();
+                        graph.GetVertex(v).parents.Add(graph.GetVertex(u));
                         pq.ChangePriority(v, alt);
                     }
                     else if (alt == dist[v])
                     {
-                        prev[v].Add(new List<int>());
-                        pathCounts[v] += 1;
-                        prev[v][pathCounts[v]].Add(u);
+                        graph.GetVertex(v).parents.Add(graph.GetVertex(u));
                     }
                 }
             }
@@ -148,15 +138,15 @@ namespace Almost_Shortest_Path
             for (int i = 0; i < dist.Length; i++)
                 dist[i] = dist[i] == Int32.MaxValue || dist[i] < 0 ? -1 : dist[i];
 
-            return (dist, prev);
+            return (dist, graph.vertices.ToArray());
         }
 
-        public struct WeightedGraph
+        public class WeightedGraph
         {
             public int vertCount, edgeCount, startVert, endVert;
             
             public Dictionary<(int, int), int> edges;
-            public List<int> vertices;
+            public List<Vertex> vertices;
 
             public WeightedGraph(string input, uint lineNumber)
             {
@@ -165,7 +155,7 @@ namespace Almost_Shortest_Path
                 int startVert = -1;
                 int endVert = -1;
                 this.edges = new Dictionary<(int, int), int>();
-                this.vertices = new List<int>();
+                this.vertices = new List<Vertex>();
 
                 try
                 {
@@ -194,13 +184,13 @@ namespace Almost_Shortest_Path
                         int v1, v2;
                         v1 = edge.Key.Item1;
                         v2 = edge.Key.Item2;
-                        if (!vertices.Contains(v1))
+                        if (!ContainsVertex(v1))
                         {
-                            vertices.Add(v1);
+                            vertices.Add(new Vertex(v1));
                         }
-                        if (!vertices.Contains(v2))
+                        if (!ContainsVertex(v2))
                         {
-                            vertices.Add(v2);
+                            vertices.Add(new Vertex(v2));
                         }
                     }
                 }
@@ -239,6 +229,80 @@ namespace Almost_Shortest_Path
                     }
                 }
                 return neighbors;
+            }
+
+            public List<int> GetParents(int vertex)
+            {
+                List<int> parents = new List<int>();
+                foreach (var edge in this.edges)
+                {
+                    if (edge.Key.Item2 == vertex)
+                    {
+                        parents.Add(edge.Key.Item1);
+                    }
+                }
+                return parents;
+            }
+
+            public Vertex GetVertex(int u)
+            {
+                foreach (Vertex v in this.vertices)
+                {
+                    if (v.id == u)
+                    {
+                        return v;
+                    }
+                }
+                return null;
+            }
+
+            public bool ContainsVertex(int u)
+            {
+                foreach (Vertex v in this.vertices)
+                {
+                    if (v.id == u)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        public class Vertex
+        {
+            public int id;
+            public List<Vertex> parents = new List<Vertex>();
+
+            public Vertex(int id)
+            {
+                this.id = id;
+            }
+
+            public override string ToString()
+            {
+                return "{" + this.id + "}";
+            }
+
+            public void ToEdges(List<(int, int)> edges)
+            {
+                if (edges == null)
+                {
+                    edges = new List<(int, int)>();
+                }
+                
+                foreach (Vertex parent in this.parents)
+                {
+                    if (parent.parents.Count > 0)
+                    {
+                        parent.ToEdges(edges);
+                    }
+                    if (!edges.Contains((parent.id, this.id)))
+                    {
+                        edges.Add((parent.id, this.id));
+                    }
+                    
+                }
             }
         }
     }
