@@ -91,14 +91,19 @@ namespace Almost_Shortest_Path.Tools
             {
                 _nodes[index].priority = newPriority;
 
-                if (index <= _size / 2)
+                HeapifyDown(index);
+                HeapifyUp(index);
+
+                // This is the code that was causing all of the problems
+                /*if (index <= _size / 2)
                 {
                     HeapifyDown(index);
                 }
                 else
                 {
                     HeapifyUp(index);
-                }
+                }*/
+
                 return true;
             }
             else
