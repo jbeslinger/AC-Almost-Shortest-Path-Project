@@ -22,7 +22,7 @@ namespace Almost_Shortest_Path.Tools
         private HashSet<Edge> shortestPathEdges = new HashSet<Edge>();
         #endregion
 
-        #region Constructor
+        #region Constructors
         public WeightedGraph(string input)
         {
             try
@@ -53,6 +53,14 @@ namespace Almost_Shortest_Path.Tools
                 Console.ReadLine();
                 Environment.Exit(1);
             }
+        }
+
+        public WeightedGraph(int vertCount, int edgeCount, int startVert, int endVert)
+        {
+            this.vertCount = vertCount;
+            this.edgeCount = edgeCount;
+            this.startVert = startVert;
+            this.endVert = endVert;
         }
         #endregion
 

@@ -11,7 +11,8 @@ namespace Almost_Shortest_Path
     {
         static void Main(string[] args)
         {
-            if (args.Length != 1)
+            #region My original file-based input
+            /*if (args.Length != 1)
             {
                 Console.WriteLine("Please provide a file to the executable.");
                 Console.ReadLine();
@@ -31,7 +32,45 @@ namespace Almost_Shortest_Path
 
             writer.Close();
             Console.Write("Done! Press return to exit.");
-            Console.ReadLine();
+            Console.ReadLine();*/
+            #endregion
+
+            #region The much faster Beecrowd input method
+            while (true)
+            {
+                string line = Console.ReadLine();
+                if (line == "0 0" || line == null)
+                {
+                    break;
+                }
+                else
+                {
+                    var graphInfo1 = line.Split(' ');
+                    var graphInfo2 = Console.ReadLine().Split(' ');
+
+                    WeightedGraph graph = new WeightedGraph
+                        (
+                        Int32.Parse(graphInfo1[0]),
+                        Int32.Parse(graphInfo1[1]),
+                        Int32.Parse(graphInfo2[0]),
+                        Int32.Parse(graphInfo2[1])
+                        );
+
+                    for (int i = 0; i < graph.edgeCount; i++)
+                    {
+                        var graphInfo3 = Console.ReadLine().Split(' ');
+                        graph.AddEdge
+                            (
+                            Int32.Parse(graphInfo3[0]),
+                            Int32.Parse(graphInfo3[1]),
+                            Int32.Parse(graphInfo3[2])
+                            );
+                    }
+
+                    Console.WriteLine(graph.AlmostShortestPath());
+                }
+            }
+            #endregion
         }
 
         static private List<WeightedGraph> ParseGraphs(string path)
